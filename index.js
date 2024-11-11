@@ -4,7 +4,6 @@ import fsPromises from 'node:fs/promises';
 import chalk from 'chalk';
 import Jimp from 'jimp';
 import termImg from 'term-img';
-import renderGif from 'render-gif';
 import logUpdate from 'log-update';
 import {imageDimensionsFromData} from 'image-dimensions';
 
@@ -130,14 +129,19 @@ terminalImage.gifBuffer = (buffer, options = {}) => {
 		return finalize;
 	}
 
-	const animation = renderGif(buffer, async frameData => {
-		options.renderFrame(await terminalImage.buffer(frameData, options));
-	}, options);
+	import("render-gif").then((renderGif) => {
+		const animation = renderGif(buffer, async frameData => {
+			options.renderFrame(await terminalImage.buffer(frameData, options));
+		}, options);
 
-	return () => {
-		animation.isPlaying = false;
+		return () => {
+			animation.isPlaying = false;
+			finalize();
+		};
+	}).catch((error) => {
+		console.error(error);
 		finalize();
-	};
+	})
 };
 
 terminalImage.gifFile = (filePath, options = {}) =>
