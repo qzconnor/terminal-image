@@ -128,6 +128,7 @@ terminalImage.gifBuffer = async (buffer, options = {}) => {
 		options.renderFrame(result);
 		return finalize;
 	}
+
 	const renderGif = await import('render-gif');
 
 	const animation = renderGif(buffer, async frameData => {
