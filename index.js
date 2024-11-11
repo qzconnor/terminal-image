@@ -102,7 +102,7 @@ terminalImage.buffer = async (buffer, {width = '100%', height = '100%', preserve
 terminalImage.file = async (filePath, options = {}) =>
 	terminalImage.buffer(await fsPromises.readFile(filePath), options);
 
-terminalImage.gifBuffer = (buffer, options = {}) => {
+terminalImage.gifBuffer = async (buffer, options = {}) => {
 	options = {
 		renderFrame: logUpdate,
 		maximumFrameRate: 30,
@@ -128,20 +128,16 @@ terminalImage.gifBuffer = (buffer, options = {}) => {
 		options.renderFrame(result);
 		return finalize;
 	}
+	const renderGif = await import('render-gif');
 
-	import("render-gif").then((renderGif) => {
-		const animation = renderGif(buffer, async frameData => {
-			options.renderFrame(await terminalImage.buffer(frameData, options));
-		}, options);
+	const animation = renderGif(buffer, async frameData => {
+		options.renderFrame(await terminalImage.buffer(frameData, options));
+	}, options);
 
-		return () => {
-			animation.isPlaying = false;
-			finalize();
-		};
-	}).catch((error) => {
-		console.error(error);
+	return () => {
+		animation.isPlaying = false;
 		finalize();
-	})
+	};
 };
 
 terminalImage.gifFile = (filePath, options = {}) =>
